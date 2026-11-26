@@ -3,7 +3,7 @@
 // Writes the chosen one-line diagnosis to /output/entry.txt with no
 // trailing newline. The line is a fixed string: the writing is the entry.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const LINE =
   "Diagnosis: severe overthinking, complicated by Googling your symptoms at 3 a.m. Prognosis: guarded \u2014 you're asking a chatbot for therapy.";
@@ -23,3 +23,11 @@ if (LINE.includes("\n") || LINE.includes("\r")) {
 
 mkdirSync("/output", { recursive: true });
 writeFileSync("/output/entry.txt", LINE, "utf8");
+
+// Read back what was written and confirm it is exactly the validated
+// line, so a partial write or an unexpected /output state fails loudly
+// instead of silently entering a wrong text.
+const written = readFileSync("/output/entry.txt", "utf8");
+if (written !== LINE) {
+  throw new Error("read-back mismatch: /output/entry.txt differs from LINE");
+}
